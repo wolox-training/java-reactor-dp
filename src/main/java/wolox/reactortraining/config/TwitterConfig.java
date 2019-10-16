@@ -43,6 +43,8 @@ public class TwitterConfig implements SocialConfigurer {
     @Bean
     public Twitter twitterTemplate() {
         return new TwitterTemplate(twitterCredentialProperties.getConsumerKey(),
-            twitterCredentialProperties.getConsumerSecret());
+            twitterCredentialProperties.getConsumerSecret(),
+            twitterCredentialProperties.getAccessToken(),
+            twitterCredentialProperties.getAccessTokenSecret());
     }
 }
