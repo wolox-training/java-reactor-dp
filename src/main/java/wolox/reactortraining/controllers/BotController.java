@@ -23,7 +23,7 @@ public class BotController {
     @Autowired
     private IBotService botService;
 
-    @PostMapping
+    @PostMapping("/")
     public Mono<Void> create(@Valid @RequestBody BotDto botDto) {
         return Mono
             .just(botDto)
@@ -32,7 +32,7 @@ public class BotController {
             .log();
     }
 
-    @GetMapping
+    @GetMapping("/")
     public Mono<BotResponse> talk(@NotEmpty @RequestParam("name") String name,
         @RequestParam(value = "length", defaultValue = "60") Integer length) {
         return botService
