@@ -27,12 +27,15 @@ public class BotController {
     public Mono<BotDto> create(@Valid @RequestBody BotDto botDto) {
         return Mono
             .just(botDto)
-            .flatMap(bot -> botService.create(botDto));
+            .flatMap(bot -> botService.create(botDto))
+            .log();
     }
 
     @GetMapping
     public Mono<BotResponse> talk(@NotEmpty @RequestParam("name") String name,
         @RequestParam(value = "length", defaultValue = "60") Integer length) {
-        return botService.talk(name, length);
+        return botService
+            .talk(name, length)
+            .log();
     }
 }
