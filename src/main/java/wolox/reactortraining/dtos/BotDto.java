@@ -1,6 +1,8 @@
 package wolox.reactortraining.dtos;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,10 +12,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class BotDto {
 
-    @NotEmpty
+    @NotBlank
     private String name;
 
     @NotEmpty
+    @Size(min = 20)
     private String text;
 
 }
