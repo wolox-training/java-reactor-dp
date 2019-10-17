@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 import wolox.reactortraining.dtos.BotDto;
-import wolox.reactortraining.models.BotResponse;
+import wolox.reactortraining.responses.BotResponse;
 import wolox.reactortraining.services.IBotService;
 
 @RestController

@@ -2,7 +2,7 @@ package wolox.reactortraining.services;
 
 import reactor.core.publisher.Mono;
 import wolox.reactortraining.dtos.BotDto;
-import wolox.reactortraining.models.BotResponse;
+import wolox.reactortraining.responses.BotResponse;
 
 public interface IBotService {
 

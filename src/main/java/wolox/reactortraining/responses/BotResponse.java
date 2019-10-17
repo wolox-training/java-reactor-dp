@@ -1,4 +1,4 @@
-package wolox.reactortraining.models;
+package wolox.reactortraining.responses;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

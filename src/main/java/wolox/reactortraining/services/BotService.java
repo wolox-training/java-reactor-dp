@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import wolox.reactortraining.dtos.BotDto;
-import wolox.reactortraining.models.BotResponse;
+import wolox.reactortraining.responses.BotResponse;
 
 @Service
 public class BotService implements IBotService {
