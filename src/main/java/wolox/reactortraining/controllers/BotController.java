@@ -24,10 +24,11 @@ public class BotController {
     private IBotService botService;
 
     @PostMapping
-    public Mono<BotDto> create(@Valid @RequestBody BotDto botDto) {
+    public Mono<Void> create(@Valid @RequestBody BotDto botDto) {
         return Mono
             .just(botDto)
-            .flatMap(bot -> botService.create(botDto))
+            .flatMap(botService::create)
+            .then()
             .log();
     }
 
