@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+import wolox.reactortraining.dtos.BotCreationDto;
 import wolox.reactortraining.dtos.BotDto;
 import wolox.reactortraining.responses.BotResponse;
 import wolox.reactortraining.services.IBotService;
@@ -37,6 +38,13 @@ public class BotController {
         @RequestParam(value = "length", defaultValue = "60") Integer length) {
         return botService
             .talk(name, length)
+            .log();
+    }
+
+    @PostMapping("/create")
+    public Mono<Void> createBot(@Valid @RequestBody BotCreationDto botCreationDto) {
+        return botService
+            .createBot(botCreationDto)
             .log();
     }
 }
