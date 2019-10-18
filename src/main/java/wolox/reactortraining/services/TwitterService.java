@@ -11,10 +11,6 @@ public class TwitterService {
     @Autowired
     private Twitter twitter;
 
-    public TwitterService() {
-        // NO-OP
-    }
-
     public SearchResults searchSpringBoot(String query) {
         return twitter
             .searchOperations()
