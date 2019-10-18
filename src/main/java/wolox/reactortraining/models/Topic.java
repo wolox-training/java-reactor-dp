@@ -2,7 +2,6 @@ package wolox.reactortraining.models;
 
 import java.util.List;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
@@ -12,7 +11,6 @@ import wolox.reactortraining.dtos.TopicDto;
 
 @Document
 @Getter
-@NoArgsConstructor
 @Setter
 @ToString
 public class Topic {
@@ -25,10 +23,10 @@ public class Topic {
     @DBRef
     private List<User> users;
 
-    public static Topic fromDto(TopicDto dto) {
-        Topic topic = new Topic();
-        topic.description = dto.getDescription();
+    public Topic() {
+    }
 
-        return topic;
+    public Topic(TopicDto dto) {
+        this.description = dto.getDescription();
     }
 }
