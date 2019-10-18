@@ -102,13 +102,13 @@ public class BotService implements IBotService {
     @Override
     public Mono<Void> createBot(BotCreationDto botCreationDto) {
         Mono<User> userMono = createUser(botCreationDto.getUsername());
-        Mono<Void> createBot = createBot(botCreationDto.getBotName(), botCreationDto.getTopics());
+        Mono<Void> feedBot = feedBot(botCreationDto.getBotName(), botCreationDto.getTopics());
 
         return userMono
             .flatMap(
                 user -> Mono.zip(createTopics(user, botCreationDto.getTopics()), Mono.just(user)))
             .flatMap(this::addTopicsToUser)
-            .then(createBot);
+            .then(feedBot);
     }
 
     private Mono<User> createUser(String username) {
@@ -129,7 +129,7 @@ public class BotService implements IBotService {
             .collectList();
     }
 
-    private Mono<Void> createBot(String botName, List<String> topics) {
+    private Mono<Void> feedBot(String botName, List<String> topics) {
         return twitterService
             .getTweetsStreamPipe()
             .map(Tweet::getText)
