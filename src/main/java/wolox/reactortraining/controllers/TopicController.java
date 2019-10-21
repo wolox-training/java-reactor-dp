@@ -43,8 +43,8 @@ public class TopicController {
     public Mono<Void> delete(@PathVariable("id") String id) {
         return topicRepository
             .findById(id)
-            .switchIfEmpty(error(new TopicNotFound()))
             .flatMap(topicRepository::delete)
+            .switchIfEmpty(error(new TopicNotFound()))
             .log();
     }
 
