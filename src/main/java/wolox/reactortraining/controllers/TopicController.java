@@ -33,8 +33,7 @@ public class TopicController {
     public Mono<Void> create(@Valid @RequestBody TopicDto topicDto) {
         return Mono
             .just(topicDto)
-            .map(Topic::new)
-            .flatMap(topicRepository::insert)
+            .flatMap(dto -> topicRepository.insert(new Topic(dto)))
             .then()
             .log();
     }

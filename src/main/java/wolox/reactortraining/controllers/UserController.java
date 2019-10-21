@@ -31,8 +31,7 @@ public class UserController {
     public Mono<Void> create(@Valid @RequestBody UserDto userDto) {
         return Mono
             .just(userDto)
-            .map(User::new)
-            .flatMap(userRepository::insert)
+            .flatMap(dto -> userRepository.insert(new User(dto)))
             .then()
             .log();
     }
