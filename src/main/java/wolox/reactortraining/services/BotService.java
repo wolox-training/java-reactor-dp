@@ -2,11 +2,14 @@ package wolox.reactortraining.services;
 
 import static reactor.core.publisher.Mono.error;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.social.twitter.api.Tweet;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,15 @@ import wolox.reactortraining.responses.BotResponse;
 @Service
 public class BotService implements IBotService {
 
+    private static final int VALUE_MAX_MESSAGES = 8; // Value is no include in random generation;
+    private static final long VALUE_MIN_MESSAGES = 3; // Added to get random numbers among 3 & 10;
+
+    @Value("${bot.min-message-long}")
+    private Integer minMessageLong;
+
+    @Value("${bot.max-message-long}")
+    private Integer maxMessageLong;
+
     @Autowired
     @Qualifier("bot-api")
     private WebClient botWebClient;
@@ -42,6 +54,8 @@ public class BotService implements IBotService {
     private TwitterService twitterService;
 
     private Logger logger = LoggerFactory.getLogger(BotService.class);
+
+    private Random randomGenerator = new Random();
 
     private static TopicDto createTopicDto(String description) {
         TopicDto topicDto = new TopicDto();
@@ -109,6 +123,32 @@ public class BotService implements IBotService {
                 user -> Mono.zip(createTopics(user, botCreationDto.getTopics()), Mono.just(user)))
             .flatMap(this::addTopicsToUser)
             .then(feedBot);
+    }
+
+    @Override
+    public Flux<String> createConversation(List<String> names) {
+        List<Flux<String>> conversationalFluxes = new ArrayList<>();
+
+        for (String name : names) {
+            Flux<String> botChat = Flux
+                .just(name)
+                .flatMap(botName -> talk(botName,
+                    randomGenerator.nextInt(maxMessageLong - minMessageLong) + minMessageLong))
+                .repeat(VALUE_MIN_MESSAGES + randomGenerator.nextInt(VALUE_MAX_MESSAGES))
+                .map(response ->
+                    String.format(
+                        "%n-----> { botName:%s } <-----%n%s%n%n",
+                        response.getName(),
+                        response.getResponse()
+                    )
+                );
+
+            conversationalFluxes.add(botChat);
+        }
+
+        return Flux
+            .merge(Flux.merge(conversationalFluxes))
+            .log();
     }
 
     private Mono<User> createUser(String username) {
