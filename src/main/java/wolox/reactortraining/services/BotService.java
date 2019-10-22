@@ -175,11 +175,11 @@ public class BotService implements IBotService {
             .map(Tweet::getText)
             .take(500)
             .filter(text -> tweetHasTopics(text, topics))
+            .switchIfEmpty(error(MatchingTweetsNotFound::new))
             .collectList()
             .map(stringList -> String.join(" ", stringList))
             .map(text -> createBotDto(botName, text))
             .flatMap(this::create)
-            .switchIfEmpty(error(MatchingTweetsNotFound::new))
             .then();
     }
 
