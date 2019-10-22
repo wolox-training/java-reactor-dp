@@ -13,11 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 import wolox.reactortraining.dtos.BotCreationDto;
 import wolox.reactortraining.dtos.BotDto;
 import wolox.reactortraining.dtos.TopicDto;
 import wolox.reactortraining.dtos.UserDto;
-import wolox.reactortraining.exceptions.MatchingTwitsNotFound;
+import wolox.reactortraining.exceptions.MatchingTweetsNotFound;
 import wolox.reactortraining.models.Topic;
 import wolox.reactortraining.models.User;
 import wolox.reactortraining.repositories.TopicRepository;
@@ -41,6 +42,38 @@ public class BotService implements IBotService {
     private TwitterService twitterService;
 
     private Logger logger = LoggerFactory.getLogger(BotService.class);
+
+    private static TopicDto createTopicDto(String description) {
+        TopicDto topicDto = new TopicDto();
+        topicDto.setDescription(description);
+        return topicDto;
+    }
+
+    private static boolean tweetHasTopics(String tweet, List<String> topics) {
+        boolean contains = false;
+
+        for (String topic : topics) {
+            if (tweet.contains(topic)) {
+                contains = true;
+                break;
+            }
+        }
+
+        return contains;
+    }
+
+    private static BotDto createBotDto(String botName, String text) {
+        BotDto botDto = new BotDto();
+        botDto.setName(botName);
+        botDto.setText(text);
+        return botDto;
+    }
+
+    private static Topic createTopicModel(TopicDto dto, User user) {
+        Topic topic = new Topic(dto);
+        topic.addUser(user);
+        return topic;
+    }
 
     @Override
     public Mono<BotDto> create(BotDto botDto) {
@@ -72,16 +105,9 @@ public class BotService implements IBotService {
         Mono<Void> createBot = createBot(botCreationDto.getBotName(), botCreationDto.getTopics());
 
         return userMono
-            .flatMap(user ->
-                Mono.zip(createTopics(user, botCreationDto.getTopics()), Mono.just(user)))
-            .flatMap(tuple -> {
-                User user = tuple.getT2();
-                List<Topic> topics = tuple.getT1();
-
-                user.addTopics(topics);
-
-                return userRepository.save(user);
-            })
+            .flatMap(
+                user -> Mono.zip(createTopics(user, botCreationDto.getTopics()), Mono.just(user)))
+            .flatMap(this::addTopicsToUser)
             .then(createBot);
     }
 
@@ -97,16 +123,8 @@ public class BotService implements IBotService {
     private Mono<List<Topic>> createTopics(User user, List<String> topics) {
         return Flux
             .fromIterable(topics)
-            .map(description -> {
-                TopicDto topicDto = new TopicDto();
-                topicDto.setDescription(description);
-                return topicDto;
-            })
-            .map(dto -> {
-                Topic topic = new Topic(dto);
-                topic.addUser(user);
-                return topic;
-            })
+            .map(BotService::createTopicDto)
+            .map(dto -> createTopicModel(dto, user))
             .flatMap(topicRepository::insert)
             .collectList();
     }
@@ -116,26 +134,21 @@ public class BotService implements IBotService {
             .getTweetsStreamPipe()
             .map(Tweet::getText)
             .take(500)
-            .filter(text -> {
-                for (String topic : topics) {
-                    if (text.contains(topic)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            })
+            .filter(text -> tweetHasTopics(text, topics))
             .collectList()
             .map(stringList -> String.join(" ", stringList))
-            .map(text -> {
-                BotDto botDto = new BotDto();
-                botDto.setName(botName);
-                botDto.setText(text);
-                return botDto;
-            })
+            .map(text -> createBotDto(botName, text))
             .flatMap(this::create)
-            .switchIfEmpty(error(MatchingTwitsNotFound::new))
+            .switchIfEmpty(error(MatchingTweetsNotFound::new))
             .then();
     }
 
+    private Mono<User> addTopicsToUser(Tuple2<List<Topic>, User> tuple) {
+        User user = tuple.getT2();
+        List<Topic> topics = tuple.getT1();
+
+        user.addTopics(topics);
+
+        return userRepository.save(user);
+    }
 }

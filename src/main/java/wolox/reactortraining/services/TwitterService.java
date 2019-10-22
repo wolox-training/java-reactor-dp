@@ -2,6 +2,7 @@ package wolox.reactortraining.services;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +35,10 @@ public class TwitterService {
 
     private ConnectableFlux<Tweet> createTweetsStreamPipe() {
 
-        StreamingOperations streamingOperations = twitter.streamingOperations();
-
         logger.info("-> creating: getTweetsStreamPipe");
 
         ConnectableFlux<Tweet> tweetsListener = Flux
-            .create((FluxSink<Tweet> emitter) -> {
-                StreamListener streamListener = new StreamListenerDelegate(emitter);
-                List<StreamListener> listeners = Collections.singletonList(streamListener);
-                streamingOperations.sample(listeners);
-            })
+            .create(streamingEmitter())
             .doOnError(error -> logger.error("Error sampling Twitter stream API", error))
             .publish();
 
@@ -64,5 +59,15 @@ public class TwitterService {
         logger.info("-> called: getTweetsStreamPipe");
 
         return tweetsConnectionFlux;
+    }
+
+    private Consumer<FluxSink<Tweet>> streamingEmitter() {
+        return emitter -> {
+            StreamingOperations streamingOperations = twitter.streamingOperations();
+
+            StreamListener streamListener = new StreamListenerDelegate(emitter);
+            List<StreamListener> listeners = Collections.singletonList(streamListener);
+            streamingOperations.sample(listeners);
+        };
     }
 }
