@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 import wolox.reactortraining.dtos.BotCreationDto;
 import wolox.reactortraining.dtos.BotDto;
 import wolox.reactortraining.responses.BotResponse;
-import wolox.reactortraining.services.IBotService;
+import wolox.reactortraining.services.BotService;
 
 @RestController
 @RequestMapping("/bots")
@@ -26,7 +26,7 @@ import wolox.reactortraining.services.IBotService;
 public class BotController {
 
     @Autowired
-    private IBotService botService;
+    private BotService botService;
 
     @PostMapping("/")
     public Mono<Void> create(@Valid @RequestBody BotDto botDto) {
