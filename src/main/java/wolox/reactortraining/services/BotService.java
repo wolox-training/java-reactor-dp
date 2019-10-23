@@ -89,6 +89,11 @@ public class BotService implements IBotService {
         return topic;
     }
 
+    private static String formatResponse(BotResponse response) {
+        return String.format("%n-----> { botName:%s } <-----%n%s%n%n", response.getName(),
+            response.getResponse());
+    }
+
     @Override
     public Mono<BotDto> create(BotDto botDto) {
         return botWebClient
@@ -132,16 +137,9 @@ public class BotService implements IBotService {
         for (String name : names) {
             Flux<String> botChat = Flux
                 .just(name)
-                .flatMap(botName -> talk(botName,
-                    randomGenerator.nextInt(maxMessageLong - minMessageLong) + minMessageLong))
+                .flatMap(this::makeBotTalk)
                 .repeat(VALUE_MIN_MESSAGES + randomGenerator.nextInt(VALUE_MAX_MESSAGES))
-                .map(response ->
-                    String.format(
-                        "%n-----> { botName:%s } <-----%n%s%n%n",
-                        response.getName(),
-                        response.getResponse()
-                    )
-                );
+                .map(BotService::formatResponse);
 
             conversationalFluxes.add(botChat);
         }
@@ -190,5 +188,10 @@ public class BotService implements IBotService {
         user.addTopics(topics);
 
         return userRepository.save(user);
+    }
+
+    private Mono<BotResponse> makeBotTalk(String botName) {
+        int length = randomGenerator.nextInt(maxMessageLong - minMessageLong) + minMessageLong;
+        return talk(botName, length);
     }
 }
