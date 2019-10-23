@@ -1,6 +1,8 @@
 package wolox.reactortraining.models;
 
+import java.util.ArrayList;
 import java.util.List;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,6 +15,7 @@ import wolox.reactortraining.dtos.UserDto;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 public class User {
 
     @Id
@@ -20,14 +23,18 @@ public class User {
 
     private String username;
 
-    @DBRef
-    private List<Topic> topics;
+    @DBRef(lazy = true)
+    private List<Topic> topics = new ArrayList<>();
 
     public User() {
     }
 
     public User(UserDto dto) {
         this.username = dto.getUsername();
+    }
+
+    public void addTopics(List<Topic> topics) {
+        this.topics.addAll(topics);
     }
 }
 

@@ -1,6 +1,9 @@
 package wolox.reactortraining.config;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -10,6 +13,8 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "twitter")
 @PropertySource("classpath:twitter.properties")
 @Validated
+@Getter
+@Setter
 public class TwitterCredentialProperties {
 
     @NotEmpty
@@ -24,35 +29,7 @@ public class TwitterCredentialProperties {
     @NotEmpty
     private String accessTokenSecret;
 
-    public String getConsumerKey() {
-        return consumerKey;
-    }
+    @Min(500)
+    private Integer amountToProcess;
 
-    public void setConsumerKey(String consumerKey) {
-        this.consumerKey = consumerKey;
-    }
-
-    public String getConsumerSecret() {
-        return consumerSecret;
-    }
-
-    public void setConsumerSecret(String consumerSecret) {
-        this.consumerSecret = consumerSecret;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public String getAccessTokenSecret() {
-        return accessTokenSecret;
-    }
-
-    public void setAccessTokenSecret(String accessTokenSecret) {
-        this.accessTokenSecret = accessTokenSecret;
-    }
 }

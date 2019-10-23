@@ -1,6 +1,9 @@
 package wolox.reactortraining.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
 import java.util.List;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,6 +16,7 @@ import wolox.reactortraining.dtos.TopicDto;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 public class Topic {
 
     @Id
@@ -20,13 +24,20 @@ public class Topic {
 
     private String description;
 
-    @DBRef
-    private List<User> users;
+    @DBRef(lazy = true)
+    @JsonIgnore
+    private List<User> users = new ArrayList<>();
 
     public Topic() {
     }
 
     public Topic(TopicDto dto) {
         this.description = dto.getDescription();
+    }
+
+    public void addUser(User user) {
+        if (!users.contains(user)) {
+            users.add(user);
+        }
     }
 }
