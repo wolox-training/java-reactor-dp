@@ -1,5 +1,6 @@
 package wolox.reactortraining.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.EqualsAndHashCode;
@@ -23,8 +24,9 @@ public class Topic {
 
     private String description;
 
-    @DBRef
-    private List<User> users;
+    @DBRef(lazy = true)
+    @JsonIgnore
+    private List<User> users = new ArrayList<>();
 
     public Topic() {
     }
@@ -34,16 +36,8 @@ public class Topic {
     }
 
     public void addUser(User user) {
-        if (users == null) {
-            users = new ArrayList<>();
-        }
-
         if (!users.contains(user)) {
             users.add(user);
-        } else {
-            int index = users.indexOf(user);
-            users.set(index, user);
         }
-
     }
 }
