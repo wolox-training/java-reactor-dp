@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
+import wolox.reactortraining.config.TwitterCredentialProperties;
 import wolox.reactortraining.dtos.BotCreationDto;
 import wolox.reactortraining.dtos.BotDto;
 import wolox.reactortraining.dtos.TopicDto;
@@ -52,6 +53,9 @@ public class BotService implements IBotService {
 
     @Autowired
     private TwitterService twitterService;
+
+    @Autowired
+    private TwitterCredentialProperties twitterCredentialProperties;
 
     private Logger logger = LoggerFactory.getLogger(BotService.class);
 
@@ -169,7 +173,7 @@ public class BotService implements IBotService {
         return twitterService
             .getTweetsStreamPipe()
             .map(Tweet::getText)
-            .take(500)
+            .take(twitterCredentialProperties.getAmountToProcess())
             .filter(text -> tweetHasTopics(text, topics))
             .switchIfEmpty(error(MatchingTweetsNotFound::new))
             .collectList()
