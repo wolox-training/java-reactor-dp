@@ -2,9 +2,9 @@ package wolox.reactortraining.services;
 
 import static reactor.core.publisher.Mono.error;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,17 +132,15 @@ public class BotService implements IBotService {
 
     @Override
     public Flux<String> createConversation(List<String> names) {
-        List<Flux<String>> conversationalFluxes = new ArrayList<>();
-
-        for (String name : names) {
-            Flux<String> botChat = Flux
+        List<Flux<String>> conversationalFluxes = names
+            .stream()
+            .map(name -> Flux
                 .just(name)
                 .flatMap(this::makeBotTalk)
                 .repeat(VALUE_MIN_MESSAGES + randomGenerator.nextInt(VALUE_MAX_MESSAGES))
-                .map(BotService::formatResponse);
-
-            conversationalFluxes.add(botChat);
-        }
+                .map(BotService::formatResponse)
+            )
+            .collect(Collectors.toList());
 
         return Flux
             .merge(Flux.merge(conversationalFluxes))
