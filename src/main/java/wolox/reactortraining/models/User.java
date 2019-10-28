@@ -23,8 +23,8 @@ public class User {
 
     private String username;
 
-    @DBRef
-    private List<Topic> topics;
+    @DBRef(lazy = true)
+    private List<Topic> topics = new ArrayList<>();
 
     public User() {
     }
@@ -34,10 +34,6 @@ public class User {
     }
 
     public void addTopics(List<Topic> topics) {
-        if (this.topics == null) {
-            this.topics = new ArrayList<>();
-        }
-
         this.topics.addAll(topics);
     }
 }
