@@ -59,7 +59,7 @@ public class TopicControllerTest {
             .uri(createTopicUrl)
             .body(BodyInserters.fromObject(topicDto))
             .exchange()
-            .expectStatus().isCreated();
+            .expectStatus().isOk();
     }
 
     @Test

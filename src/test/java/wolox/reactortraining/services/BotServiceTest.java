@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,6 +35,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.test.publisher.TestPublisher;
 import wolox.reactortraining.beans.WebClientBean;
+import wolox.reactortraining.config.TwitterCredentialProperties;
 import wolox.reactortraining.dtos.BotCreationDto;
 import wolox.reactortraining.dtos.BotDto;
 import wolox.reactortraining.models.Topic;
@@ -44,10 +46,12 @@ import wolox.reactortraining.responses.BotResponse;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {BotService.class, WebClientBean.class})
+@EnableConfigurationProperties(value = {TwitterCredentialProperties.class})
 @TestPropertySource(properties = {
     "bot.min-message-long=20",
     "bot.max-message-long=60",
-    "api.bots.uri=http://localhost:7000"
+    "api.bots.uri=http://localhost:7000",
+    "twitter.amountToProcess=500",
 })
 public class BotServiceTest {
 
@@ -55,6 +59,9 @@ public class BotServiceTest {
 
     @Autowired
     private BotService botService;
+
+    @Autowired
+    private TwitterCredentialProperties twitterCredentialProperties;
 
     @MockBean
     private TopicRepository topicRepository;

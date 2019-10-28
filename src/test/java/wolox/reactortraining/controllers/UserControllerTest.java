@@ -59,7 +59,7 @@ public class UserControllerTest {
             .uri(createUserUrl)
             .body(BodyInserters.fromObject(userDto))
             .exchange()
-            .expectStatus().isCreated();
+            .expectStatus().isOk();
     }
 
     @Test
