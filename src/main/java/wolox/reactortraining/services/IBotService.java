@@ -1,5 +1,7 @@
 package wolox.reactortraining.services;
 
+import java.util.List;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import wolox.reactortraining.dtos.BotCreationDto;
 import wolox.reactortraining.dtos.BotDto;
@@ -12,5 +14,7 @@ public interface IBotService {
     Mono<BotResponse> talk(String name, Integer length);
 
     Mono<Void> createBot(BotCreationDto botCreationDto);
+
+    Flux<String> createConversation(List<String> names);
 
 }

@@ -3,10 +3,13 @@ package wolox.reactortraining.services;
 import static reactor.core.publisher.Mono.error;
 
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.social.twitter.api.Tweet;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,15 @@ import wolox.reactortraining.responses.BotResponse;
 @Service
 public class BotService implements IBotService {
 
+    private static final int VALUE_MAX_MESSAGES = 8; // Value is no include in random generation;
+    private static final long VALUE_MIN_MESSAGES = 3; // Added to get random numbers among 3 & 10;
+
+    @Value("${bot.min-message-long}")
+    private Integer minMessageLong;
+
+    @Value("${bot.max-message-long}")
+    private Integer maxMessageLong;
+
     @Autowired
     @Qualifier("bot-api")
     private WebClient botWebClient;
@@ -46,6 +58,8 @@ public class BotService implements IBotService {
     private TwitterCredentialProperties twitterCredentialProperties;
 
     private Logger logger = LoggerFactory.getLogger(BotService.class);
+
+    private Random randomGenerator = new Random();
 
     private static TopicDto createTopicDto(String description) {
         TopicDto topicDto = new TopicDto();
@@ -79,6 +93,11 @@ public class BotService implements IBotService {
         return topic;
     }
 
+    private static String formatResponse(BotResponse response) {
+        return String.format("%n-----> { botName:%s } <-----%n%s%n%n", response.getName(),
+            response.getResponse());
+    }
+
     @Override
     public Mono<BotDto> create(BotDto botDto) {
         return botWebClient
@@ -106,13 +125,30 @@ public class BotService implements IBotService {
     @Override
     public Mono<Void> createBot(BotCreationDto botCreationDto) {
         Mono<User> userMono = createUser(botCreationDto.getUsername());
-        Mono<Void> createBot = createBot(botCreationDto.getBotName(), botCreationDto.getTopics());
+        Mono<Void> feedBot = feedBot(botCreationDto.getBotName(), botCreationDto.getTopics());
 
         return userMono
             .flatMap(
                 user -> Mono.zip(createTopics(user, botCreationDto.getTopics()), Mono.just(user)))
             .flatMap(this::addTopicsToUser)
-            .then(createBot);
+            .then(feedBot);
+    }
+
+    @Override
+    public Flux<String> createConversation(List<String> names) {
+        List<Flux<String>> conversationalFluxes = names
+            .stream()
+            .map(name -> Flux
+                .just(name)
+                .flatMap(this::makeBotTalk)
+                .repeat(VALUE_MIN_MESSAGES + randomGenerator.nextInt(VALUE_MAX_MESSAGES))
+                .map(BotService::formatResponse)
+            )
+            .collect(Collectors.toList());
+
+        return Flux
+            .merge(Flux.merge(conversationalFluxes))
+            .log();
     }
 
     private Mono<User> createUser(String username) {
@@ -133,7 +169,7 @@ public class BotService implements IBotService {
             .collectList();
     }
 
-    private Mono<Void> createBot(String botName, List<String> topics) {
+    private Mono<Void> feedBot(String botName, List<String> topics) {
         return twitterService
             .getTweetsStreamPipe()
             .map(Tweet::getText)
@@ -154,5 +190,10 @@ public class BotService implements IBotService {
         user.addTopics(topics);
 
         return userRepository.save(user);
+    }
+
+    private Mono<BotResponse> makeBotTalk(String botName) {
+        int length = randomGenerator.nextInt(maxMessageLong - minMessageLong) + minMessageLong;
+        return talk(botName, length);
     }
 }
