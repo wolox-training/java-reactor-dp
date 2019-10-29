@@ -1,8 +1,8 @@
 package wolox.reactortraining.repositories;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.assertj.core.api.Assertions.assertThat;
+import static wolox.reactortraining.TestUtils.generateUser;
 
 import java.util.Collections;
 import org.junit.Before;
@@ -49,10 +49,7 @@ public class UserRepositoryTest {
 
     @Test
     public void givenPersistedUsersInDB_whenFindAllIsCalled_thenReturnNonEmptyResultSet() {
-        UserDto dto = new UserDto();
-        dto.setUsername(randomAlphanumeric(6));
-
-        User user = new User(dto);
+        User user = generateUser();
 
         User persistedUser = userRepository
             .save(user)
@@ -70,10 +67,7 @@ public class UserRepositoryTest {
 
     @Test
     public void whenInsertNewUser_thenItMustBeReturnedWithAnId() {
-        UserDto dto = new UserDto();
-        dto.setUsername(randomAlphanumeric(6));
-
-        User user = new User(dto);
+        User user = generateUser();
 
         Mono<User> insertUserMono = userRepository.insert(user);
 
