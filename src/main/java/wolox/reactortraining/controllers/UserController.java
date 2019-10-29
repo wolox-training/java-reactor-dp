@@ -37,8 +37,8 @@ public class UserController {
     public Mono<Void> delete(@PathVariable("id") String id) {
         return userRepository
             .findById(id)
-            .flatMap(userRepository::delete)
             .switchIfEmpty(Mono.error(new UserNotFound()))
+            .flatMap(userRepository::delete)
             .log();
     }
 
