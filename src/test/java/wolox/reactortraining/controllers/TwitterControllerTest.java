@@ -24,7 +24,7 @@ import wolox.reactortraining.services.TwitterService;
 @WebFluxTest(TwitterController.class)
 public class TwitterControllerTest {
 
-    private final String searchTweeterUrl = "/twitter";
+    private final String searchTwitterUrl = "/twitter";
 
     @Autowired
     private WebTestClient webTestClient;
@@ -59,7 +59,7 @@ public class TwitterControllerTest {
         webTestClient
             .get()
             .uri(uriBuilder -> uriBuilder
-                .path(searchTweeterUrl)
+                .path(searchTwitterUrl)
                 .queryParam("query", query)
                 .build()
             )

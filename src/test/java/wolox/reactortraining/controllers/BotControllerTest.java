@@ -163,10 +163,8 @@ public class BotControllerTest {
 
     @Test
     public void givenValidInput_whenConversationIsCalled_thenResponseMustBeSuccess() {
-        String conversation1 = "conversation_1";
-
         List<String> conversations = Arrays
-            .asList(conversation1, "conversation_2", "conversation_3", "conversation_4");
+            .asList("conversation_1", "conversation_2", "conversation_3", "conversation_4");
 
         Flux<String> stringFlux = Flux.fromIterable(conversations);
 
